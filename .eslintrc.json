@@ -43,6 +43,12 @@
         },
         "newlines-between": "always"
       }
+    ],
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": false
+      }
     ]
   }
 }
