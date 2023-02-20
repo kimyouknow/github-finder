@@ -39,7 +39,7 @@ const combineNodes = (nodes: Array<BaseNode>): string => {
   return convertDFToString(fragment)
 }
 
-export const dom = (template: TemplateStringsArray, ...args: Arg[]): HTMLElement => {
+export const html = (template: TemplateStringsArray, ...args: Arg[]): HTMLElement => {
   const nodes = args.map(arg => (arg instanceof Array ? combineNodes(arg) : replaceTypeToString(arg)))
   const container = document.createElement('template')
   container.innerHTML = String.raw(template, ...nodes)
