@@ -1,13 +1,16 @@
-import '@/style/index.scss'
-import $app from '@/App'
+import '@/style/index.scss';
+import handleSearchFormEvent from '@/controllers/event';
+import { $, html } from '@/utils/dom';
+import $searchForm from '@/views/SearchForm';
+import $userList from '@/views/UserList';
 
-const $root = document.querySelector('#root')
+const $root = $('#root');
 
-if ($root) {
-  $root.appendChild($app)
-  $root.innerHTML = `
-  <div>
-    <h2>heelo</h2>
-  </div>
-`
+const $app = html`${$searchForm()} ${$userList()}`;
+
+function init() {
+  $root.appendChild($app);
+  handleSearchFormEvent();
 }
+
+window.addEventListener('DOMContentLoaded', init);

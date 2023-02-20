@@ -1,20 +1,20 @@
 export interface FetchOptions {
-  method?: 'GET' | 'POST' | 'DELETE' | 'PATCH'
-  headers?: Record<string, string>
-  body?: string
+  method?: 'GET' | 'POST' | 'DELETE' | 'PATCH';
+  headers?: Record<string, string>;
+  body?: string;
 }
 
 export class FetchError extends Error {
-  status: number
+  status: number;
 
   constructor(message: string, status: number) {
-    super(message)
-    this.status = status
+    super(message);
+    this.status = status;
   }
 }
 
 export const fetchData = async <T>(url: string, options: FetchOptions = {}): Promise<T> => {
-  const { method = 'GET', headers = {}, body } = options
+  const { method = 'GET', headers = {}, body } = options;
 
   try {
     const response = await fetch(url, {
@@ -24,20 +24,20 @@ export const fetchData = async <T>(url: string, options: FetchOptions = {}): Pro
         ...headers,
       },
       body,
-    })
+    });
 
     if (!response.ok) {
-      throw new FetchError(response.statusText, response.status)
+      throw new FetchError(response.statusText, response.status);
     }
 
-    const data = (await response.json()) as T
-    return data
+    const data = (await response.json()) as T;
+    return data;
   } catch (error) {
     if (error instanceof FetchError) {
-      console.error(`Fetch failed: ${error.message} (${error.status})`)
+      console.error(`Fetch failed: ${error.message} (${error.status})`);
     } else {
-      console.error(`Fetch failed: `, error)
+      console.error(`Fetch failed: `, error);
     }
-    throw error
+    throw error;
   }
-}
+};

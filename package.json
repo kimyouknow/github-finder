@@ -4,6 +4,7 @@
   "description": "github finder - user, code",
   "main": "index.js",
   "scripts": {
+    "postinstall": "husky install",
     "test": "jest",
     "dev": "webpack-dev-server --config webpack/webpack.development.js",
     "prod": "webpack-dev-server --config webpack/webpack.production.js",
