@@ -4,6 +4,14 @@
 
 [Github Open API - Search](https://docs.github.com/ko/rest/search?apiVersion=2022-11-28)를 활용한 검색 서비스
 
+## 기술 구현 문서
+
+- [ ] : ⭐️ [vanilla front end architecture](docs/core.md)
+- [x] : ⭐️ [커스텀 html](docs/html.md)
+- [x] : [최적화(debounce, throttle)](docs/optimize.md)
+- [ ] : fetch util
+- [ ] : scss
+
 ## 기능 구현
 
 - [x] : profile finder
@@ -35,11 +43,3 @@
 - [ ] : 키보드 이동(맨 아래로 갔을 때 되돌아가기)
 - [ ] : 키보드 이동 중간 엔터 눌렀을 때 검색되게 하기
 - [ ] : 검색날짜?
-
-## 기술 구현
-
-- [ ] : [vanilla front end architecture](docs/core.md)
-- [x] : [커스텀 html](docs/html.md)
-- [x] : [최적화(debounce, throttle)](docs/optimize.md)
-- [ ] : fetch util
-- [ ] : scss
