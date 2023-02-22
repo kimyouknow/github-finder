@@ -6,21 +6,17 @@ import { debounce } from '@/utils/optimize';
 import { KeywordList, SearchAutoComplete } from '@/views/SearchForm';
 import UserList from '@/views/UserList';
 
-const requestQuery = async (query: string) => {
+const handleSubmit = async (event: Event) => {
+  event.preventDefault();
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
   const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
   const $userList = $<HTMLElement>('#userList');
-  await userProfileStore.requestUserProfile(query);
+  await userProfileStore.requestUserProfile($inputNickname.value);
+  $inputNickname.value = '';
 
   const userProfiles = userProfileStore.userProfiles;
   $userList.outerHTML = UserList(userProfiles);
   $searchAutoComplete.classList.toggle('display-none');
-};
-
-const handleSubmit = async (event: Event) => {
-  event.preventDefault();
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  await requestQuery($inputNickname.value);
-  $inputNickname.value = '';
 };
 
 const handleAutoComplete = async () => {
@@ -47,6 +43,7 @@ const handleSearchInput = debounce(1000, async () => {
 const handleKeyDown = async (event: KeyboardEvent) => {
   const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
   const $keywordList = $<HTMLElement>('#keywordList', $searchAutoComplete);
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
 
   if (keywordStore.keywords.length === 0) return;
 
@@ -55,13 +52,16 @@ const handleKeyDown = async (event: KeyboardEvent) => {
   // TODO 활성화되어 있는 창에서 작동하도록 하기
   if (key === 'ArrowDown') {
     // Down arrow key pressed
-    keywordStore.moveActive('down');
+    const activeKeyword = keywordStore.moveActive('down');
+
+    $inputNickname.value = activeKeyword.text;
     $keywordList.outerHTML = KeywordList(keywordStore.keywords);
     return;
   }
   if (key === 'ArrowUp') {
     // Up arrow key pressed
-    keywordStore.moveActive('up');
+    const activeKeyword = keywordStore.moveActive('up');
+    $inputNickname.value = activeKeyword.text;
     $keywordList.outerHTML = KeywordList(keywordStore.keywords);
     return;
   }

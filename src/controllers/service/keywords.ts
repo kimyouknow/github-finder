@@ -6,7 +6,7 @@ export type Keyword = {
 interface KeywordStore {
   keywords: Keyword[];
   getKeywords: (keywords: Keyword[]) => void;
-  moveActive: (dr: 'up' | 'down') => void;
+  moveActive: (dr: 'up' | 'down') => Keyword;
 }
 
 const keywordStore: KeywordStore = {
@@ -30,6 +30,7 @@ const keywordStore: KeywordStore = {
       const isActive = i === nextIndex;
       return { ...k, isActive };
     });
+    return this.keywords[nextIndex];
   },
 };
 
