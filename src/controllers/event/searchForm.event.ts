@@ -27,8 +27,13 @@ const handleAutoComplete = async () => {
     $searchAutoComplete.outerHTML = SearchAutoComplete();
     return;
   }
-  const { items, total_count } = await getGitHubUserProfile($inputNickname.value, 10);
-  const keywords: Keyword[] = items.map(({ id, login }) => ({ id, text: login, isActive: false }));
+  await userProfileStore.requestUserProfile($inputNickname.value);
+  const userProfiles = userProfileStore.userProfiles;
+  const keywords: Keyword[] = userProfiles.map(({ id, nickname }) => ({
+    id,
+    text: nickname,
+    isActive: false,
+  }));
   $searchAutoComplete.outerHTML = SearchAutoComplete(keywords);
   keywordStore.getKeywords(keywords);
   // 다시 탐색해서 dom을 선택해야 outerHTML로 선택한 dom이 선택됨
@@ -53,7 +58,6 @@ const handleKeyDown = async (event: KeyboardEvent) => {
   if (key === 'ArrowDown') {
     // Down arrow key pressed
     const activeKeyword = keywordStore.moveActive('down');
-
     $inputNickname.value = activeKeyword.text;
     $keywordList.outerHTML = KeywordList(keywordStore.keywords);
     return;
