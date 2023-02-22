@@ -126,6 +126,10 @@ const handleAutoComplete = async () => {
 };
 ```
 
+### 구현 결과
+
+https://user-images.githubusercontent.com/71386219/220572280-ace2efc5-af68-445a-b1e9-3d09e701e738.mov
+
 ## 2차 적용: 상태 기반 렌더링
 
 ### view
