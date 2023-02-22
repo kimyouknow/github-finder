@@ -1,6 +1,6 @@
 export type BaseNode = DocumentFragment | Document | Element | HTMLElement;
 
-type Arg = Array<BaseNode> | BaseNode | string | number;
+type Arg = Array<BaseNode | string> | BaseNode | string | number;
 
 export const convertNodeToString = (element: Node): string => {
   return element.nodeValue || '';
@@ -25,7 +25,7 @@ const replaceTypeToString = (arg: Arg) => {
   return '';
 };
 
-const combineNodes = (nodes: Array<BaseNode>): string => {
+const combineNodes = (nodes: Array<BaseNode | string>): string => {
   const fragment = document.createDocumentFragment();
   nodes.forEach(node => {
     if (node instanceof DocumentFragment) {
@@ -39,14 +39,24 @@ const combineNodes = (nodes: Array<BaseNode>): string => {
   return convertDFToString(fragment);
 };
 
-export const html = (template: TemplateStringsArray, ...args: Arg[]): HTMLElement => {
-  const nodes = args.map(arg => (arg instanceof Array ? combineNodes(arg) : replaceTypeToString(arg)));
+export const htmlDom = (template: TemplateStringsArray, ...args: Arg[]): HTMLElement => {
+  const nodes = args.map(arg =>
+    arg instanceof Array ? combineNodes(arg) : replaceTypeToString(arg),
+  );
   const container = document.createElement('template');
   container.innerHTML = String.raw(template, ...nodes);
   return container.content.cloneNode(true) as HTMLElement;
 };
 
-export const $ = <T extends Element>(selector: string, base: BaseNode = document) => base.querySelector(selector) as T;
+export const html = (template: TemplateStringsArray, ...args: Arg[]): string => {
+  const nodes = args.map(arg =>
+    arg instanceof Array ? combineNodes(arg) : replaceTypeToString(arg),
+  );
+  return String.raw(template, ...nodes);
+};
+
+export const $ = <T extends Element>(selector: string, base: BaseNode = document) =>
+  base.querySelector(selector) as T;
 
 export const $$ = <T extends Element>(selector: string, base: BaseNode = document) =>
   [...base.querySelectorAll(selector)] as T[];

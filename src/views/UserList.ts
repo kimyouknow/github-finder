@@ -1,15 +1,11 @@
-import { GitHubUser } from '@/apis';
-import { $, html } from '@/utils/dom';
+import { UserProfile } from '@/controllers/service/userProfile';
+import { html } from '@/utils/dom';
 
-const $userList = (users?: GitHubUser[]) => {
-  const $userList = $('#user-list');
-  if (!$userList || !users) {
-    return html`<ul id="user-list"></ul>`;
-  }
-  const $users = html`${users.map(user => html`<li>${user.login}</li>`)}`;
-  $userList.innerHTML = '';
-  $userList.appendChild($users);
-  return $userList;
+const UserList = (users?: UserProfile[]) => {
+  const $users = users ? html`${users.map(user => html`<li>${user.nickname}</li>`)}` : '';
+  return html`<ul id="userList">
+    ${$users}
+  </ul>`;
 };
 
-export default $userList;
+export default UserList;

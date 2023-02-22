@@ -1,42 +1,53 @@
-import { GitHubUser } from '@/apis';
-import { $, html } from '@/utils/dom';
+import { Keyword } from '@/controllers/service/keywords';
+import { html } from '@/utils/dom';
 
-const $searchForm = () => html`
-  <div id="search-form-container">
-    <form id="search-form">
-      <input id="input-nickname" type="text" name="nickname" placeholder="search for nickname" />
+const SearchForm = () => html`
+  <div id="searchFormContainer">
+    <form id="searchForm">
+      <input
+        id="inputNickname"
+        type="text"
+        name="nickname"
+        placeholder="search for nickname"
+        autocomplete="off"
+      />
       <button>제출</button>
     </form>
-    ${$searchAutoComplete()}
-    <div id="search-history" class="display-none">
+    ${SearchAutoComplete()}
+    <div id="searchHistory" class="display-none">
       <ul></ul>
       <div>
-        <button id="search-history-delete-all">전체 삭제</button>
+        <button id="searchHistoryDeleteAll">전체 삭제</button>
       </div>
     </div>
   </div>
 `;
 
-export const $searchAutoComplete = (users?: GitHubUser[]) => {
-  const $searchAutoComplete = $('#search-auto-complete');
-  if (!$searchAutoComplete || !users) {
-    return html`<div id="search-auto-complete" class="display-none">
-      <h4></h4>
-      <ul></ul>
-      <div>
-        <button id="search-auto-complete-delete-all">전체 삭제</button>
-      </div>
-    </div>`;
-  }
-
-  $searchAutoComplete.classList.toggle('display-none');
-
-  const $autoSuggestions = html`${users.map(
-    user => html`<li id="search-auto-complete-term" data-search-auto-complete-id=${user.id}>${user.login}</li>`,
-  )}`;
-  $searchAutoComplete.innerHTML = '';
-  $searchAutoComplete.appendChild($autoSuggestions);
-  return $searchAutoComplete;
+export const SearchAutoComplete = (keywords?: Keyword[]) => {
+  return html`<div id="searchAutoComplete" class="display-none">
+    <h4></h4>
+    ${keywords ? KeywordList(keywords) : EmptyKeyword()}
+    <div>
+      <button id="searchAutoCompleteDeleteAll">전체 삭제</button>
+    </div>
+  </div>`;
 };
 
-export default $searchForm;
+export const EmptyKeyword = () => {
+  return html`<ul>
+    <h4>일치하는 키워드가 없습니다.</h4>
+  </ul>`;
+};
+
+export const KeywordList = (keywords: Keyword[]) => {
+  return html`<ul id="keywordList">
+    ${keywords.map(
+      ({ id, text, isActive }, idx) =>
+        html`<li data-id=${id} data-rank=${idx} class=${isActive ? 'keyword-active' : ''}>
+          ${text}
+        </li>`,
+    )}
+  </ul>`;
+};
+
+export default SearchForm;

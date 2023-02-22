@@ -22,7 +22,10 @@ const coreGithubSearchRequest = async <T>(type: SearchType, query: string) => {
       Authorization: `Bearer ${GITHUB_API_TOKEN}`,
     },
   };
-  const result = await fetchData<T>(`https://api.github.com/search/${type}?${query}`, githubOpenApiHeader);
+  const result = await fetchData<T>(
+    `https://api.github.com/search/${type}?${query}`,
+    githubOpenApiHeader,
+  );
   return result;
 };
 
@@ -31,7 +34,10 @@ const coreGithubSearchRequest = async <T>(type: SearchType, query: string) => {
 // 304	: Not modified
 // 422	: Validation failed, or the endpoint has been spammed.
 // 503	: Service unavailable
-export const getGitHubUserProfile = async (username: string, per_page = 30): Promise<GithubUserList> => {
+export const getGitHubUserProfile = async (
+  username: string,
+  per_page = 30,
+): Promise<GithubUserList> => {
   const query = `q=${username}&per_page=${per_page}`;
   const users = await coreGithubSearchRequest<GithubUserList>('users', query);
   return users;

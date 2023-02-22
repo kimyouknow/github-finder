@@ -59,16 +59,16 @@ paragraph instanceof HTMLElement; // => true
 
 ```ts
 const $searchForm = () => dom`
-  <div id="search-form-container">
-    <form id="search-form">
-      <input id="input-nickname" type="text" name="nickname" placeholder="search for nickname" />
+  <div id="searchFormContainer">
+    <form id="searchForm">
+      <input id="inputNickname" type="text" name="nickname" placeholder="search for nickname" />
       <button>제출</button>
     </form>
     ${$searchAutoComplete()}
-    <div id="search-history" class="display-none">
+    <div id="searchHistory" class="display-none">
       <ul></ul>
       <div>
-        <button id="search-history-delete-all">전체 삭제</button>
+        <button id="searchHistoryDeleteAll">전체 삭제</button>
       </div>
     </div>
   </div>
@@ -81,16 +81,16 @@ const $searchForm = () => dom`
 
 ```ts
 const $searchForm = () => html`
-  <div id="search-form-container">
-    <form id="search-form">
-      <input id="input-nickname" type="text" name="nickname" placeholder="search for nickname" />
+  <div id="searchFormContainer">
+    <form id="searchForm">
+      <input id="inputNickname" type="text" name="nickname" placeholder="search for nickname" />
       <button>제출</button>
     </form>
     ${$searchAutoComplete()}
-    <div id="search-history" class="display-none">
+    <div id="searchHistory" class="display-none">
       <ul></ul>
       <div>
-        <button id="search-history-delete-all">전체 삭제</button>
+        <button id="searchHistoryDeleteAll">전체 삭제</button>
       </div>
     </div>
   </div>
