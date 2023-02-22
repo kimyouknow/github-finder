@@ -1,20 +1,29 @@
 import { getGitHubUserProfile } from '@/apis';
+import keywordStore, { Keyword } from '@/controllers/service/keywords';
+import userProfileStore from '@/controllers/service/userProfile';
 import { $ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
-import { SearchAutoComplete } from '@/views/SearchForm';
-import userList from '@/views/UserList';
+import { KeywordList, SearchAutoComplete } from '@/views/SearchForm';
+import UserList from '@/views/UserList';
+
+const requestQuery = async (query: string) => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  const $userList = $<HTMLElement>('#userList');
+  await userProfileStore.requestUserProfile(query);
+
+  const userProfiles = userProfileStore.userProfiles;
+  $userList.outerHTML = UserList(userProfiles);
+  $searchAutoComplete.classList.toggle('display-none');
+};
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
-  const $searchForm = $<HTMLElement>('#searchFormContainer');
-  const $inputNickname = $<HTMLInputElement>('#inputNickname', $searchForm);
-
-  const { items, total_count } = await getGitHubUserProfile($inputNickname.value);
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  await requestQuery($inputNickname.value);
   $inputNickname.value = '';
-  userList(items);
 };
 
-const handleSearchInput = debounce(1000, async (event: Event) => {
+const handleAutoComplete = async () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $inputNickname = $<HTMLInputElement>('#inputNickname', $searchForm);
   let $searchAutoComplete = $<HTMLElement>('#searchAutoComplete', $searchForm);
@@ -23,30 +32,38 @@ const handleSearchInput = debounce(1000, async (event: Event) => {
     return;
   }
   const { items, total_count } = await getGitHubUserProfile($inputNickname.value, 10);
-  $searchAutoComplete.outerHTML = SearchAutoComplete(items);
+  const keywords: Keyword[] = items.map(({ id, login }) => ({ id, text: login, isActive: false }));
+  $searchAutoComplete.outerHTML = SearchAutoComplete(keywords);
+  keywordStore.getKeywords(keywords);
   // 다시 탐색해서 dom을 선택해야 outerHTML로 선택한 dom이 선택됨
   $searchAutoComplete = $<HTMLElement>('#searchAutoComplete', $searchForm);
   $searchAutoComplete.classList.toggle('display-none');
-});
-
-export const $activeKeywordList = () => {
-  const $keywordList = $('#keywordList');
-  if ($keywordList) {
-    return;
-  }
 };
 
-const handleKeyDown = (event: KeyboardEvent) => {
+const handleSearchInput = debounce(1000, async () => {
+  await handleAutoComplete();
+});
+
+const handleKeyDown = async (event: KeyboardEvent) => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  const $keywordList = $<HTMLElement>('#keywordList', $searchAutoComplete);
+
+  if (keywordStore.keywords.length === 0) return;
+
   const { key } = event;
   // TODO $inputNickname에 값이 있으면 자동 검색 , 없으면 최근 검색 기록 보여주기
   // TODO 활성화되어 있는 창에서 작동하도록 하기
-  switch (key) {
-    case 'ArrowDown': // Down arrow key pressed
-      break;
-    case 'ArrowUp': // Up arrow key pressed
-      break;
-    default:
-      break;
+  if (key === 'ArrowDown') {
+    // Down arrow key pressed
+    keywordStore.moveActive('down');
+    $keywordList.outerHTML = KeywordList(keywordStore.keywords);
+    return;
+  }
+  if (key === 'ArrowUp') {
+    // Up arrow key pressed
+    keywordStore.moveActive('up');
+    $keywordList.outerHTML = KeywordList(keywordStore.keywords);
+    return;
   }
 };
 
