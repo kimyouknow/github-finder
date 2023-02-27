@@ -53,7 +53,8 @@ const handleAutoComplete = async () => {
     return;
   }
   await userProfileStore.requestUserProfile($inputNickname.value);
-  const keywords = makeKeywordDto(userProfileStore.getUserProfiles());
+  // 요청한 30개 중 10개만 사용하기
+  const keywords = makeKeywordDto(userProfileStore.getUserProfiles().slice(10));
   keywordStore.setKeywords(keywords);
   updateSearchAutoCompleteList(keywords);
 };
