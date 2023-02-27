@@ -1,53 +1,72 @@
-import { getGitHubUserProfile } from '@/apis';
 import keywordStore, { Keyword } from '@/controllers/service/keywords';
-import userProfileStore from '@/controllers/service/userProfile';
-import { $ } from '@/utils/dom';
+import userProfileStore, { UserProfile } from '@/controllers/service/userProfile';
+import { $, render } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
 import { KeywordList, SearchAutoComplete } from '@/views/SearchForm';
 import UserList from '@/views/UserList';
 
+// Update View
+
+const updateInput = (text?: string) => {
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  $inputNickname.value = text || '';
+};
+
+const updateUserProfileList = (userProfiles: UserProfile[]) => {
+  const $userList = $<HTMLElement>('#userList');
+  render($userList, UserList, userProfiles);
+};
+
+const updateSearchAutoCompleteList = (keywords?: Keyword[]) => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  render($searchAutoComplete, SearchAutoComplete, keywords);
+};
+
+const toggleSearchAutoCompleteList = () => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  $searchAutoComplete.classList.toggle('display-none');
+};
+
+const updateKeywordList = (keywords: Keyword[]) => {
+  const $keywordList = $<HTMLElement>('#keywordList');
+  render($keywordList, KeywordList, keywords);
+};
+
+// Event Handler
+
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  const $userList = $<HTMLElement>('#userList');
   await userProfileStore.requestUserProfile($inputNickname.value);
-  $inputNickname.value = '';
+  updateInput();
 
   const userProfiles = userProfileStore.userProfiles;
-  $userList.outerHTML = UserList(userProfiles);
-  $searchAutoComplete.classList.toggle('display-none');
+  updateUserProfileList(userProfiles);
+  toggleSearchAutoCompleteList();
 };
 
 const handleAutoComplete = async () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $inputNickname = $<HTMLInputElement>('#inputNickname', $searchForm);
-  let $searchAutoComplete = $<HTMLElement>('#searchAutoComplete', $searchForm);
   if ($inputNickname.value === '') {
-    $searchAutoComplete.outerHTML = SearchAutoComplete();
+    updateSearchAutoCompleteList();
     return;
   }
   await userProfileStore.requestUserProfile($inputNickname.value);
-  const userProfiles = userProfileStore.userProfiles;
-  const keywords: Keyword[] = userProfiles.map(({ id, nickname }) => ({
+  const keywords: Keyword[] = userProfileStore.userProfiles.map(({ id, nickname }) => ({
     id,
     text: nickname,
     isActive: false,
   }));
-  $searchAutoComplete.outerHTML = SearchAutoComplete(keywords);
-  keywordStore.getKeywords(keywords);
-  // 다시 탐색해서 dom을 선택해야 outerHTML로 선택한 dom이 선택됨
-  $searchAutoComplete = $<HTMLElement>('#searchAutoComplete', $searchForm);
-  $searchAutoComplete.classList.toggle('display-none');
+  updateSearchAutoCompleteList(keywords);
 };
 
 const handleSearchInput = debounce(1000, async () => {
   await handleAutoComplete();
+  toggleSearchAutoCompleteList();
 });
 
-const handleKeyDown = async (event: KeyboardEvent) => {
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  const $keywordList = $<HTMLElement>('#keywordList', $searchAutoComplete);
+const handleKeyDown = (event: KeyboardEvent) => {
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
 
   if (keywordStore.keywords.length === 0) return;
@@ -59,14 +78,14 @@ const handleKeyDown = async (event: KeyboardEvent) => {
     // Down arrow key pressed
     const activeKeyword = keywordStore.moveActive('down');
     $inputNickname.value = activeKeyword.text;
-    $keywordList.outerHTML = KeywordList(keywordStore.keywords);
+    updateKeywordList(keywordStore.keywords);
     return;
   }
   if (key === 'ArrowUp') {
     // Up arrow key pressed
     const activeKeyword = keywordStore.moveActive('up');
     $inputNickname.value = activeKeyword.text;
-    $keywordList.outerHTML = KeywordList(keywordStore.keywords);
+    updateKeywordList(keywordStore.keywords);
     return;
   }
 };
