@@ -1,3 +1,5 @@
+import { cloneDeep } from '@/utils';
+
 export type Keyword = {
   id: number;
   text: string;
@@ -5,14 +7,18 @@ export type Keyword = {
 };
 interface KeywordStore {
   keywords: Keyword[];
-  getKeywords: (keywords: Keyword[]) => void;
+  getKeywords: () => Keyword[];
+  setKeywords: (keywords: Keyword[]) => void;
   moveActive: (dr: 'up' | 'down') => Keyword;
 }
 
 const keywordStore: KeywordStore = {
   keywords: [],
-  getKeywords(keywords) {
-    this.keywords = [...keywords];
+  getKeywords() {
+    return Object.freeze(cloneDeep(this.keywords)) as Keyword[];
+  },
+  setKeywords(keywords: Keyword[]) {
+    this.keywords = cloneDeep(keywords);
   },
   moveActive(dr) {
     const activeIndex = this.keywords.findIndex(k => k.isActive);

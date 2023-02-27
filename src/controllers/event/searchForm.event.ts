@@ -58,6 +58,7 @@ const handleAutoComplete = async () => {
     text: nickname,
     isActive: false,
   }));
+  keywordStore.setKeywords(keywords);
   updateSearchAutoCompleteList(keywords);
 };
 
