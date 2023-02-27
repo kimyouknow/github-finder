@@ -1,4 +1,5 @@
 import { getGitHubUserProfile } from '@/apis';
+import { cloneDeep } from '@/utils';
 
 export type UserProfile = {
   id: number;
@@ -7,30 +8,38 @@ export type UserProfile = {
   avatarUrl: string;
 };
 
-interface UserProfileStore {
-  userProfileCount: number;
+interface UserProfileState {
   userProfiles: UserProfile[];
-  requestUserProfile: (text: string) => Promise<void>;
-  updateUserProfile: (userProfiles: UserProfile[], count: number) => void;
+  userProfileCount: number;
 }
 
-const userProfileStore: UserProfileStore = {
-  userProfiles: [],
-  userProfileCount: 0,
-  async requestUserProfile(text: string) {
-    const { items, total_count } = await getGitHubUserProfile(text);
-    const profiles = items.map(({ id, login, html_url, avatar_url }) => ({
-      id,
-      nickname: login,
-      htmlUrl: html_url,
-      avatarUrl: avatar_url,
-    }));
-    this.updateUserProfile(profiles, total_count);
-  },
-  updateUserProfile(userProfiles, count) {
-    this.userProfiles = userProfiles;
-    this.userProfileCount = count;
-  },
+const UserProfile = () => {
+  const state: UserProfileState = {
+    userProfiles: [],
+    userProfileCount: 0,
+  };
+  return {
+    getUserProfiles() {
+      // return Object.freeze(cloneDeep(state.userProfiles)); // FIXME: Argument of type 'readonly UserProfile[]' is not assignable to parameter of type 'UserProfile[]'.
+      return cloneDeep(state.userProfiles);
+    },
+    async requestUserProfile(text: string) {
+      const { items, total_count } = await getGitHubUserProfile(text);
+      const profiles = items.map(({ id, login, html_url, avatar_url }) => ({
+        id,
+        nickname: login,
+        htmlUrl: html_url,
+        avatarUrl: avatar_url,
+      }));
+      this.updateUserProfile(profiles, total_count);
+    },
+    updateUserProfile(userProfiles: UserProfile[], count: number) {
+      state.userProfiles = cloneDeep(userProfiles);
+      state.userProfileCount = count;
+    },
+  };
 };
+
+const userProfileStore = UserProfile();
 
 export default userProfileStore;

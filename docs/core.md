@@ -1,8 +1,13 @@
 # Core 만들기
 
+> 아무도 유지 관리하지 않는 또 다른 프레임워크를 만들지 마라~ 필요하다고 예측할 때가 아니라 실제로 필요할 떄 구현해라
+
 ## 목표
 
 - 관심사가 분리된 구조 만들기
+  - 순수한 view
+  - 상태관리
+  - 이벤트 핸들러
 - vanilla로 만들면서 dom 조작 및 event 조작에 대해 공부
 - 선언적 프로그래밍과 추상화 (절차지향적인 코드 ❌)
 
@@ -36,6 +41,8 @@
 문제점
 
 - view가 너무 복잡하다.
+  - 웹용 렌더링 엔진: 가독성과 유지 관리성을 고려해야 한다.
+  - 순수한 view: `view = fn(state)`
   - 프론트는 view에서 이벤트가 발생한다.
   - view에서 이벤트가 발생해서 상태를 바꾸고 model이 변경되면 또 다른 view가 변해야할 경우도 있다.
 - view는 계층적이다.
@@ -45,6 +52,26 @@
   - event는 상태변경만 요청한다.
 
 ## 1차 : event 중심
+
+- 비즈니스 로직
+  - business logic data
+    - 외부에서 접근 불가능한 상태 분리
+  - business logic
+    - business logic data를 관리하는 로직
+    - DTO
+      - server 데이터 키 값을 front값으로 변경(ex: snake -> carmel)
+    - 명령과 조회 분리
+      - http method에서 뿐만 아니라 로컬 상태 관리에서도
+      - 명령: 상태를 변경, 상태를 반환하지 않는 메서드 (ex: post, patch, delete과 같은 http method)
+      - 조회: 결과를 반환, 상태를 변환하지 않는 메서드 (ex: get과 같은 http method )
+- UI 업데이트 로직
+
+  - view state
+    - dom selector & event handler
+  - view logic
+    - ex: updateOrderInfoView()
+
+- https://youtu.be/K1lKgxeXDrs
 
 ### 핵심기능(검색창)
 
@@ -130,8 +157,16 @@ const handleAutoComplete = async () => {
 
 https://user-images.githubusercontent.com/71386219/220572280-ace2efc5-af68-445a-b1e9-3d09e701e738.mov
 
+### 리팩토링
+
+view update 로직 개선
+
+- updateOrderInfoView와 같은 ui업데이트 로직 분리
+- 리렌더유틸
+
 ## 2차 적용: 상태 기반 렌더링
 
-### view
+### Re: view
 
-- 데이터 상태가 변경될 때 쉽게 렌더링되어야한다.
+- 현재 이벤트 발생(상태변경) 이후 렌더링을 render함수를 활용해 수동으로 하고 있다. 수동은 어쨋든 실수 및 오류를 발생할 수 있는 가능성을 높힌다.
+- render함수를 상태 관리 로직에 바인딩하기

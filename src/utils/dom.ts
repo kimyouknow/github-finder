@@ -45,7 +45,7 @@ export const htmlDom = (template: TemplateStringsArray, ...args: Arg[]): HTMLEle
   );
   const container = document.createElement('template');
   container.innerHTML = String.raw(template, ...nodes);
-  return container.content.cloneNode(true) as HTMLElement;
+  return container.content.firstElementChild?.cloneNode(true) as HTMLElement;
 };
 
 export const html = (template: TemplateStringsArray, ...args: Arg[]): string => {
@@ -60,3 +60,14 @@ export const $ = <T extends Element>(selector: string, base: BaseNode = document
 
 export const $$ = <T extends Element>(selector: string, base: BaseNode = document) =>
   [...base.querySelectorAll(selector)] as T[];
+
+export const render = <T extends Element, S>(
+  $component: T,
+  view: (param: S) => string,
+  state: S,
+) => {
+  const newDom = htmlDom`${view(state)}`;
+  $component.replaceWith(newDom);
+  // window.requestAnimationFrame(() => {});
+  // FIXME 2번째과정이 새로운 view에 적용되지 않는 문제: render()호출 -> dom 탐색 후 class 및 css 변경 -> requestAnimationFrame의 cb 실행
+};
