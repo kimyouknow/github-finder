@@ -26,9 +26,9 @@ export const toggleSearchAutoCompleteList = () => {
   $searchAutoComplete.classList.toggle('display-none');
 };
 
-export const updateKeywordList = (keywords: Keyword[]) => {
+export const updateKeywordList = (keywords: Keyword[], type: 'autoComplete' | 'history') => {
   const $keywordList = $<HTMLElement>('#keywordList');
-  render($keywordList, KeywordList, keywords);
+  render($keywordList, KeywordList, keywords, type);
 };
 
 export const updateSeachHistory = (keywords?: Keyword[]) => {

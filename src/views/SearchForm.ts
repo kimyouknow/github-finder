@@ -26,7 +26,7 @@ const SearchForm = () => html`
 export const SearchAutoComplete = (keywords?: Keyword[]) => {
   return html`<div id="searchAutoComplete" class="display-none">
     <h4></h4>
-    ${keywords ? KeywordList(keywords) : EmptyKeyword()}
+    ${keywords ? KeywordList(keywords, 'autoComplete') : EmptyKeyword()}
     <div>
       <button id="searchAutoCompleteDeleteAll">전체 삭제</button>
     </div>
@@ -39,8 +39,8 @@ export const EmptyKeyword = () => {
   </ul>`;
 };
 
-export const KeywordList = (keywords: Keyword[]) => {
-  return html`<ul id="keywordList">
+export const KeywordList = (keywords: Keyword[], type: 'autoComplete' | 'history') => {
+  return html`<ul id="keywordList" data-keyword-type=${type}>
     ${keywords.map(
       ({ id, text, isActive }, idx) =>
         html`<li data-id=${id} data-rank=${idx} class=${isActive ? 'keyword-active' : ''}>
