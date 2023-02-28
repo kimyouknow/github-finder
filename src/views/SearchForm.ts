@@ -13,19 +13,23 @@ const SearchForm = () => html`
       />
       <button>제출</button>
     </form>
-    ${SearchAutoComplete()}
-    <div id="searchHistory" class="display-none">
-      <ul></ul>
-      <div>
-        <button id="searchHistoryDeleteAll">전체 삭제</button>
-      </div>
-    </div>
+    ${SearchAutoComplete()} ${SearchHistory()}
   </div>
 `;
 
+export const SearchHistory = (keywords?: Keyword[]) => {
+  return html`<div id="searchHistory" class="display-none">
+    <h4>최근 검색어</h4>
+    ${keywords ? KeywordList(keywords, 'history') : EmptyKeyword()}
+    <div>
+      <button id="searchHistoryDeleteAll">전체 삭제</button>
+    </div>
+  </div>`;
+};
+
 export const SearchAutoComplete = (keywords?: Keyword[]) => {
   return html`<div id="searchAutoComplete" class="display-none">
-    <h4></h4>
+    <h4>검색어 자동 완성</h4>
     ${keywords ? KeywordList(keywords, 'autoComplete') : EmptyKeyword()}
     <div>
       <button id="searchAutoCompleteDeleteAll">전체 삭제</button>

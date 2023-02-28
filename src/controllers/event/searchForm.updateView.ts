@@ -1,7 +1,7 @@
 import { Keyword } from '@/controllers/service/keywords';
 import { UserProfile } from '@/controllers/service/userProfile';
 import { $, render } from '@/utils/dom';
-import { KeywordList, SearchAutoComplete } from '@/views/SearchForm';
+import { KeywordList, SearchAutoComplete, SearchHistory } from '@/views/SearchForm';
 import UserList from '@/views/UserList';
 
 // Update View
@@ -31,12 +31,12 @@ export const updateKeywordList = (keywords: Keyword[], type: 'autoComplete' | 'h
   render($keywordList, KeywordList, keywords, type);
 };
 
-export const updateSeachHistory = (keywords?: Keyword[]) => {
+export const updateSearchHistory = (keywords?: Keyword[]) => {
   const $searchHistory = $<HTMLElement>('#searchHistory');
-  render($searchHistory, SearchAutoComplete, keywords);
+  render($searchHistory, SearchHistory, keywords);
 };
 
-export const toggleSeachHistory = () => {
+export const toggleSearchHistory = () => {
   const $searchHistory = $<HTMLElement>('#searchHistory');
   $searchHistory.classList.toggle('display-none');
 };
