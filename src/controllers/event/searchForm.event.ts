@@ -1,36 +1,17 @@
-import keywordStore, { Keyword, makeKeywordDto } from '@/controllers/service/keywords';
-import userProfileStore, { UserProfile } from '@/controllers/service/userProfile';
-import { $, render } from '@/utils/dom';
+import keywordStore, { makeKeywordDto } from '@/controllers/service/keywords';
+import userProfileStore from '@/controllers/service/userProfile';
+import { $ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
-import { KeywordList, SearchAutoComplete } from '@/views/SearchForm';
-import UserList from '@/views/UserList';
 
-// Update View
+import {
+  toggleSearchAutoCompleteList,
+  updateInput,
+  updateKeywordList,
+  updateSearchAutoCompleteList,
+  updateUserProfileList,
+} from './searchForm.updateView';
 
-const updateInput = (text?: string) => {
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  $inputNickname.value = text || '';
-};
-
-const updateUserProfileList = (userProfiles: UserProfile[]) => {
-  const $userList = $<HTMLElement>('#userList');
-  render($userList, UserList, userProfiles);
-};
-
-const updateSearchAutoCompleteList = (keywords?: Keyword[]) => {
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  render($searchAutoComplete, SearchAutoComplete, keywords);
-};
-
-const toggleSearchAutoCompleteList = () => {
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  $searchAutoComplete.classList.toggle('display-none');
-};
-
-const updateKeywordList = (keywords: Keyword[]) => {
-  const $keywordList = $<HTMLElement>('#keywordList');
-  render($keywordList, KeywordList, keywords);
-};
+const { autoCompleteListStore, historyStore } = keywordStore;
 
 // Event Handler
 
@@ -55,7 +36,7 @@ const handleAutoComplete = async () => {
   await userProfileStore.requestUserProfile($inputNickname.value);
   // 요청한 30개 중 10개만 사용하기
   const keywords = makeKeywordDto(userProfileStore.getUserProfiles().slice(10));
-  keywordStore.setKeywords(keywords);
+  autoCompleteListStore.setKeywords(keywords);
   updateSearchAutoCompleteList(keywords);
 };
 
@@ -64,9 +45,9 @@ const handleSearchInput = debounce(1000, async () => {
   toggleSearchAutoCompleteList();
 });
 
-const handleKeyDown = (event: KeyboardEvent) => {
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  const keywords = keywordStore.getKeywords();
+  const keywords = autoCompleteListStore.getKeywords();
   if (keywords.length === 0) return;
 
   const { key } = event;
@@ -74,28 +55,37 @@ const handleKeyDown = (event: KeyboardEvent) => {
   // TODO 활성화되어 있는 창에서 작동하도록 하기
   if (key === 'ArrowDown') {
     // Down arrow key pressed
-    const activeKeyword = keywordStore.moveActive('down');
+    const activeKeyword = autoCompleteListStore.moveActive('down');
     $inputNickname.value = activeKeyword.text;
     updateKeywordList(keywords);
     return;
   }
   if (key === 'ArrowUp') {
     // Up arrow key pressed
-    const activeKeyword = keywordStore.moveActive('up');
+    const activeKeyword = autoCompleteListStore.moveActive('up');
     $inputNickname.value = activeKeyword.text;
     updateKeywordList(keywords);
     return;
   }
 };
 
+const handleClickSearchInput = (event: Event) => {
+  console.log('event.target.value', event.currentTarget);
+  // 로컬스토리에서 검색 목록 가져오기
+  // 없으면 빈 화면 렌더링
+
+  // 있으면 업데이트 후 렌더링
+};
+
 const handleSearchFormEvent = () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $form = $<HTMLFormElement>('#searchForm', $searchForm);
-  const $inputNickname = $<HTMLInputElement>('#inputNickname', $searchForm);
+  const $searchInput = $<HTMLInputElement>('#inputNickname', $searchForm);
 
   $form.addEventListener('submit', handleSubmit);
-  $inputNickname.addEventListener('input', handleSearchInput);
-  $inputNickname.addEventListener('keydown', handleKeyDown);
+  $searchInput.addEventListener('input', handleSearchInput);
+  $searchInput.addEventListener('keydown', handleKeyDownSearchInput);
+  $searchInput.addEventListener('click', handleClickSearchInput);
 };
 
 export default handleSearchFormEvent;
