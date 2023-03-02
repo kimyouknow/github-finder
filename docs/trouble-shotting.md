@@ -137,3 +137,87 @@ const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => 
 - `ReturnType` 유형은 setTimeout 함수의 반환 유형과 일치하는 timeoutId 유형을 지정하는 데 사용
 
 - https://stackoverflow.com/questions/41944650/this-implicitly-has-type-any-because-it-does-not-have-a-type-annotation
+
+## Input 값 변경시 focus가 맨 앞에 찍히는 에러
+
+```ts
+const updateInputText = (text: string) => {
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  $inputNickname.value = text;
+};
+
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  // 생략
+  if (key === 'ArrowDown') {
+    updateInputText(activeKeyword.text);
+  }
+  if (key === 'ArrowUp') {
+    // 이 때만 아래와 같은 에러 발생
+    updateInputText(activeKeyword.text);
+  }
+  // 생략
+};
+```
+
+에러 결과
+
+```bash
+# | : 커서 위치
+# 이동전
+asdf|
+# 이동후
+|new
+```
+
+### 해결
+
+keyup 이벤트로 input창으로 돌아갈 시, 커서가 글자의 맨 앞에 오는 버그
+ArrowDown, ArrowUp, ArrowLeft, ArrowRight 일 때 defalut로 설정해주는 커서 포인터가 있다.
+ArrowUp일 때는 커서가 맨앞으로 가도록 설정되어 있기 때문
+event.key가 ArrowUp일 때는 event.preventDefault가 되도록 설정하여 해결
+
+```js
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  event.preventDefault();
+};
+
+// 이렇게 하면 한글만 써지고, 영어, 숫자 안써짐
+```
+
+## @babel/preset-env useBuiltIns과 corejs 옵션
+
+babel.config.json
+
+아래와 같이 하면 에러 발생ㅇ
+
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      { "targets": "> 0.25%, not dead", "modules": false, "useBuiltIns": "usage", "corejs": 3 }
+    ],
+    "@babel/preset-typescript"
+  ]
+}
+```
+
+에러
+
+```bash
+core-js/modules/es.array.*.js
+```
+
+### 분석
+
+아직 이해하지 못함
+
+#### core-js@3
+
+#### useBuiltIns
+
+> When either the usage or entry options are used, @babel/preset-env will add direct references to core-js modules as bare imports (or requires). This means core-js will be resolved relative to the file itself and needs to be accessible. (@babel/preset-env는 core-js 모듈에 대한 직접 참조를 베어 가져오기(또는 필요)로 추가한다. 이는 core-js가 파일 자체와 관련하여 해결되며 액세스할 수 있어야 함을 의미한다.)
+
+- https://babeljs.io/docs/babel-preset-env#usebuiltins
+- https://velog.io/@vnthf/corejs3로-대체하자-zok3p9aouy
+- https://tech.kakao.com/2020/12/01/frontend-growth-02/

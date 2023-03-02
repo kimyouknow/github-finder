@@ -61,12 +61,12 @@ export const $ = <T extends Element>(selector: string, base: BaseNode = document
 export const $$ = <T extends Element>(selector: string, base: BaseNode = document) =>
   [...base.querySelectorAll(selector)] as T[];
 
-export const render = <T extends Element, S>(
+export const render = <T extends Element, S extends any[]>(
   $component: T,
-  view: (param: S) => string,
-  state: S,
+  view: (...args: any[]) => string,
+  ...args: S
 ) => {
-  const newDom = htmlDom`${view(state)}`;
+  const newDom = htmlDom`${view(...args)}`;
   $component.replaceWith(newDom);
   // window.requestAnimationFrame(() => {});
   // FIXME 2번째과정이 새로운 view에 적용되지 않는 문제: render()호출 -> dom 탐색 후 class 및 css 변경 -> requestAnimationFrame의 cb 실행

@@ -1,4 +1,5 @@
-import { cloneDeep } from '@/utils';
+import { cloneDeep, DateMMDD, formatDateToMMDD } from '@/utils';
+import browserStorage from '@/utils/browser';
 
 import { UserProfile } from './userProfile';
 
@@ -6,22 +7,26 @@ export type Keyword = {
   id: number;
   text: string;
   isActive: boolean;
+  searchAt: DateMMDD;
 };
 
-export const makeKeywordDto = (userProfiles: UserProfile[]): Keyword[] =>
-  userProfiles.map(({ id, nickname }) => ({
-    id,
-    text: nickname,
-    isActive: false,
-  }));
+export const makeKeywordDto = (text: string, id: number = new Date().valueOf()): Keyword => ({
+  id,
+  text,
+  isActive: false,
+  searchAt: formatDateToMMDD(new Date()),
+});
+
+export const makeKeywordDtoList = (userProfiles: UserProfile[]): Keyword[] =>
+  userProfiles.map(({ id, nickname }) => makeKeywordDto(nickname, id));
 
 interface KeywordState {
   keywords: Keyword[];
 }
 
-const KeyWord = () => {
+const KeyWord = (initKeywords: Keyword[]) => {
   const state: KeywordState = {
-    keywords: [],
+    keywords: initKeywords,
   };
   return {
     getKeywords() {
@@ -51,6 +56,36 @@ const KeyWord = () => {
   };
 };
 
-const keywordStore = KeyWord();
+const HistoryKeyWord = (initKeywords: Keyword[], storageKey: string) => {
+  const keywordManager = KeyWord(initKeywords);
+  const saveToStorage = (keywords: Keyword[]) => {
+    browserStorage.set(storageKey, keywords);
+  };
+  return {
+    ...keywordManager,
+    getFormStorage() {
+      const keywords = browserStorage.get<Keyword[]>(storageKey);
+      if (keywords !== null) {
+        keywordManager.setKeywords(keywords);
+        return keywordManager.getKeywords();
+      }
+      return null;
+    },
+    addKeyword(text: string) {
+      const keywords = keywordManager.getKeywords();
+      const newKeyword = makeKeywordDto(text);
+      // TODO: 중복제거
+      const newKeywords = [...keywords, newKeyword];
+      keywordManager.setKeywords(newKeywords);
+      saveToStorage(newKeywords);
+    },
+  };
+};
 
-export default keywordStore;
+const autoCompleteListStore = KeyWord([]);
+const historyStore = HistoryKeyWord([], 'history-keywords');
+
+export default {
+  autoCompleteListStore,
+  historyStore,
+};

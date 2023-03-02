@@ -10,7 +10,9 @@
     "prod": "webpack-dev-server --config webpack/webpack.production.js",
     "build:dev": "webpack --config webpack/webpack.development.js",
     "build:prod": "webpack --config webpack/webpack.production.js",
-    "lint": "npx eslint --init"
+    "lint": "npx eslint --init",
+    "deploy": "npm run build:prod && gh-pages -d dist -b deploy",
+    "prepare": "husky install"
   },
   "author": "kimyouknow",
   "license": "ISC",
@@ -32,8 +34,9 @@
     "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
+    "gh-pages": "^5.0.0",
     "html-webpack-plugin": "^5.5.0",
-    "husky": "^8.0.3",
+    "husky": "^8.0.0",
     "lint-staged": "^13.1.2",
     "mini-css-extract-plugin": "^2.7.2",
     "prettier": "^2.8.4",

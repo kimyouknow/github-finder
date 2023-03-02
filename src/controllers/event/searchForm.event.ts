@@ -1,101 +1,128 @@
-import keywordStore, { Keyword, makeKeywordDto } from '@/controllers/service/keywords';
-import userProfileStore, { UserProfile } from '@/controllers/service/userProfile';
-import { $, render } from '@/utils/dom';
+import keywordStore, { makeKeywordDtoList } from '@/controllers/service/keywords';
+import userProfileStore from '@/controllers/service/userProfile';
+import { $ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
-import { KeywordList, SearchAutoComplete } from '@/views/SearchForm';
-import UserList from '@/views/UserList';
 
-// Update View
+import {
+  showAutoCompleteList,
+  showSearchHistory,
+  toggleSearchAutoCompleteList,
+  toggleSearchHistory,
+  updateInput,
+  updateInputText,
+  updateKeywordList,
+  updateSearchAutoCompleteList,
+  updateSearchHistory,
+  updateUserProfileList,
+} from './searchForm.updateView';
 
-const updateInput = (text?: string) => {
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  $inputNickname.value = text || '';
-};
-
-const updateUserProfileList = (userProfiles: UserProfile[]) => {
-  const $userList = $<HTMLElement>('#userList');
-  render($userList, UserList, userProfiles);
-};
-
-const updateSearchAutoCompleteList = (keywords?: Keyword[]) => {
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  render($searchAutoComplete, SearchAutoComplete, keywords);
-};
-
-const toggleSearchAutoCompleteList = () => {
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  $searchAutoComplete.classList.toggle('display-none');
-};
-
-const updateKeywordList = (keywords: Keyword[]) => {
-  const $keywordList = $<HTMLElement>('#keywordList');
-  render($keywordList, KeywordList, keywords);
-};
+const { autoCompleteListStore, historyStore } = keywordStore;
 
 // Event Handler
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  await userProfileStore.requestUserProfile($inputNickname.value);
+  const inputText = $inputNickname.value;
+  await userProfileStore.requestUserProfile(inputText);
+
   updateInput();
+
+  historyStore.addKeyword(inputText);
 
   const userProfiles = userProfileStore.getUserProfiles();
   updateUserProfileList(userProfiles);
+
   toggleSearchAutoCompleteList();
 };
 
-const handleAutoComplete = async () => {
-  const $searchForm = $<HTMLElement>('#searchFormContainer');
-  const $inputNickname = $<HTMLInputElement>('#inputNickname', $searchForm);
-  if ($inputNickname.value === '') {
-    updateSearchAutoCompleteList();
-    return;
-  }
-  await userProfileStore.requestUserProfile($inputNickname.value);
+const handleAutoComplete = async (inputText: string) => {
+  await userProfileStore.requestUserProfile(inputText);
   // 요청한 30개 중 10개만 사용하기
-  const keywords = makeKeywordDto(userProfileStore.getUserProfiles().slice(10));
-  keywordStore.setKeywords(keywords);
+  const keywords = makeKeywordDtoList(userProfileStore.getUserProfiles().slice(10));
+  autoCompleteListStore.setKeywords(keywords);
   updateSearchAutoCompleteList(keywords);
 };
 
 const handleSearchInput = debounce(1000, async () => {
-  await handleAutoComplete();
-  toggleSearchAutoCompleteList();
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  const inputText = $inputNickname.value;
+  if (inputText === '') {
+    const keywords = historyStore.getKeywords();
+    updateSearchHistory(keywords);
+    showSearchHistory();
+    return;
+  }
+
+  await handleAutoComplete(inputText);
+  showAutoCompleteList();
 });
 
-const handleKeyDown = (event: KeyboardEvent) => {
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  const keywords = keywordStore.getKeywords();
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  const $searchHistory = $<HTMLElement>('#searchHistory');
+  const $activeList = $searchAutoComplete.classList.contains('display-none')
+    ? $searchHistory
+    : $searchAutoComplete;
+
+  const $keywordList = $<HTMLElement>('#keywordList', $activeList);
+
+  const keywordListType = $keywordList.getAttribute('data-keyword-type') as
+    | 'autoComplete'
+    | 'history';
+
+  const keywordStoreType = keywordListType === 'history' ? historyStore : autoCompleteListStore;
+  const keywords = keywordStoreType.getKeywords();
   if (keywords.length === 0) return;
 
   const { key } = event;
-  // TODO $inputNickname에 값이 있으면 자동 검색 , 없으면 최근 검색 기록 보여주기
-  // TODO 활성화되어 있는 창에서 작동하도록 하기
   if (key === 'ArrowDown') {
     // Down arrow key pressed
-    const activeKeyword = keywordStore.moveActive('down');
-    $inputNickname.value = activeKeyword.text;
-    updateKeywordList(keywords);
+    const activeKeyword = keywordStoreType.moveActive('down');
+    const newKeywords = keywordStoreType.getKeywords();
+    updateKeywordList(newKeywords, keywordListType);
+    updateInputText(activeKeyword.text);
     return;
   }
   if (key === 'ArrowUp') {
+    event.preventDefault();
     // Up arrow key pressed
-    const activeKeyword = keywordStore.moveActive('up');
-    $inputNickname.value = activeKeyword.text;
-    updateKeywordList(keywords);
+    const activeKeyword = keywordStoreType.moveActive('up');
+    const newKeywords = keywordStoreType.getKeywords();
+    updateKeywordList(newKeywords, keywordListType);
+    updateInputText(activeKeyword.text);
     return;
   }
+};
+
+const handleClickSearchInput = (event: Event) => {
+  // 로컬스토리에서 검색 목록 가져오기
+  const textInput = (event.currentTarget as HTMLInputElement).value;
+  if (textInput !== '') {
+    return;
+  }
+  const keywords = historyStore.getFormStorage();
+
+  if (!keywords) {
+    // 없으면 빈 화면 렌더링
+    updateSearchHistory();
+  } else {
+    // 있으면 업데이트 후 렌더링
+    updateSearchHistory(keywords);
+  }
+
+  toggleSearchHistory();
 };
 
 const handleSearchFormEvent = () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $form = $<HTMLFormElement>('#searchForm', $searchForm);
-  const $inputNickname = $<HTMLInputElement>('#inputNickname', $searchForm);
+  const $searchInput = $<HTMLInputElement>('#inputNickname', $searchForm);
 
   $form.addEventListener('submit', handleSubmit);
-  $inputNickname.addEventListener('input', handleSearchInput);
-  $inputNickname.addEventListener('keydown', handleKeyDown);
+  $searchInput.addEventListener('input', handleSearchInput);
+  $searchInput.addEventListener('keydown', handleKeyDownSearchInput);
+  $searchInput.addEventListener('click', handleClickSearchInput);
 };
 
 export default handleSearchFormEvent;
