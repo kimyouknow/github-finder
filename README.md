@@ -11,6 +11,7 @@
 - [x] : [최적화(debounce, throttle)](docs/optimize.md)
 - [ ] : fetch util
 - [ ] : scss
+- [ ] : [트러블 슈팅](docs/trouble-shotting.md)
 
 ## 기능 구현
 

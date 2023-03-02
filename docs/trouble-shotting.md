@@ -183,3 +183,41 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
 
 // 이렇게 하면 한글만 써지고, 영어, 숫자 안써짐
 ```
+
+## @babel/preset-env useBuiltIns과 corejs 옵션
+
+babel.config.json
+
+아래와 같이 하면 에러 발생ㅇ
+
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      { "targets": "> 0.25%, not dead", "modules": false, "useBuiltIns": "usage", "corejs": 3 }
+    ],
+    "@babel/preset-typescript"
+  ]
+}
+```
+
+에러
+
+```bash
+core-js/modules/es.array.*.js
+```
+
+### 분석
+
+아직 이해하지 못함
+
+#### core-js@3
+
+#### useBuiltIns
+
+> When either the usage or entry options are used, @babel/preset-env will add direct references to core-js modules as bare imports (or requires). This means core-js will be resolved relative to the file itself and needs to be accessible. (@babel/preset-env는 core-js 모듈에 대한 직접 참조를 베어 가져오기(또는 필요)로 추가한다. 이는 core-js가 파일 자체와 관련하여 해결되며 액세스할 수 있어야 함을 의미한다.)
+
+- https://babeljs.io/docs/babel-preset-env#usebuiltins
+- https://velog.io/@vnthf/corejs3로-대체하자-zok3p9aouy
+- https://tech.kakao.com/2020/12/01/frontend-growth-02/
