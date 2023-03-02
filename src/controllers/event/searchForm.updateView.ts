@@ -40,3 +40,23 @@ export const toggleSearchHistory = () => {
   const $searchHistory = $<HTMLElement>('#searchHistory');
   $searchHistory.classList.toggle('display-none');
 };
+
+export const showSearchHistory = () => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  const $searchHistory = $<HTMLElement>('#searchHistory');
+  $searchHistory.classList.remove('display-none');
+  $searchAutoComplete.classList.add('display-none');
+};
+
+export const showAutoCompleteList = () => {
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  const $searchHistory = $<HTMLElement>('#searchHistory');
+  $searchAutoComplete.classList.remove('display-none');
+  $searchHistory.classList.add('display-none');
+};
+
+export const updateInputText = (text: string) => {
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  $inputNickname.value = text;
+  $inputNickname.focus();
+};
