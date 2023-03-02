@@ -137,3 +137,49 @@ const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => 
 - `ReturnType` 유형은 setTimeout 함수의 반환 유형과 일치하는 timeoutId 유형을 지정하는 데 사용
 
 - https://stackoverflow.com/questions/41944650/this-implicitly-has-type-any-because-it-does-not-have-a-type-annotation
+
+## Input 값 변경시 focus가 맨 앞에 찍히는 에러
+
+```ts
+const updateInputText = (text: string) => {
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  $inputNickname.value = text;
+};
+
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  // 생략
+  if (key === 'ArrowDown') {
+    updateInputText(activeKeyword.text);
+  }
+  if (key === 'ArrowUp') {
+    // 이 때만 아래와 같은 에러 발생
+    updateInputText(activeKeyword.text);
+  }
+  // 생략
+};
+```
+
+에러 결과
+
+```bash
+# | : 커서 위치
+# 이동전
+asdf|
+# 이동후
+|new
+```
+
+### 해결
+
+keyup 이벤트로 input창으로 돌아갈 시, 커서가 글자의 맨 앞에 오는 버그
+ArrowDown, ArrowUp, ArrowLeft, ArrowRight 일 때 defalut로 설정해주는 커서 포인터가 있다.
+ArrowUp일 때는 커서가 맨앞으로 가도록 설정되어 있기 때문
+event.key가 ArrowUp일 때는 event.preventDefault가 되도록 설정하여 해결
+
+```js
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  event.preventDefault();
+};
+
+// 이렇게 하면 한글만 써지고, 영어, 숫자 안써짐
+```

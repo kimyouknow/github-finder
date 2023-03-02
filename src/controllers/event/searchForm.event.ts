@@ -4,9 +4,12 @@ import { $ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
 
 import {
+  showAutoCompleteList,
+  showSearchHistory,
   toggleSearchAutoCompleteList,
   toggleSearchHistory,
   updateInput,
+  updateInputText,
   updateKeywordList,
   updateSearchAutoCompleteList,
   updateSearchHistory,
@@ -45,23 +48,29 @@ const handleSearchInput = debounce(1000, async () => {
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
   const inputText = $inputNickname.value;
   if (inputText === '') {
-    toggleSearchAutoCompleteList();
-    toggleSearchHistory();
+    const keywords = historyStore.getKeywords();
+    updateSearchHistory(keywords);
+    showSearchHistory();
     return;
   }
+
   await handleAutoComplete(inputText);
-  toggleSearchAutoCompleteList();
-  toggleSearchHistory();
+  showAutoCompleteList();
 });
 
 const handleKeyDownSearchInput = (event: KeyboardEvent) => {
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  const $keywordList = $<HTMLElement>('#keywordList');
+  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
+  const $searchHistory = $<HTMLElement>('#searchHistory');
+  const $activeList = $searchAutoComplete.classList.contains('display-none')
+    ? $searchHistory
+    : $searchAutoComplete;
+
+  const $keywordList = $<HTMLElement>('#keywordList', $activeList);
+
   const keywordListType = $keywordList.getAttribute('data-keyword-type') as
     | 'autoComplete'
     | 'history';
 
-  // $inputNickname에 값이 있으면 자동 검색 , 없으면 최근 검색 기록 보여주기
   const keywordStoreType = keywordListType === 'history' ? historyStore : autoCompleteListStore;
   const keywords = keywordStoreType.getKeywords();
   if (keywords.length === 0) return;
@@ -71,16 +80,17 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
     // Down arrow key pressed
     const activeKeyword = keywordStoreType.moveActive('down');
     const newKeywords = keywordStoreType.getKeywords();
-    $inputNickname.value = activeKeyword.text;
     updateKeywordList(newKeywords, keywordListType);
+    updateInputText(activeKeyword.text);
     return;
   }
   if (key === 'ArrowUp') {
+    event.preventDefault();
     // Up arrow key pressed
     const activeKeyword = keywordStoreType.moveActive('up');
     const newKeywords = keywordStoreType.getKeywords();
-    $inputNickname.value = activeKeyword.text;
     updateKeywordList(newKeywords, keywordListType);
+    updateInputText(activeKeyword.text);
     return;
   }
 };
