@@ -1,10 +1,10 @@
-const path = require('path')
-const webpack = require('webpack')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const dotenv = require('dotenv')
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const dotenv = require('dotenv');
 // const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
-dotenv.config()
+dotenv.config();
 
 module.exports = {
   resolve: {
@@ -36,4 +36,4 @@ module.exports = {
     }),
     // new BundleAnalyzerPlugin(),
   ],
-}
+};

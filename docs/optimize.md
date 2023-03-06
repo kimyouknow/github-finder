@@ -34,7 +34,9 @@ addEventListener의 이벤트핸들러는 이벤트가 발생할 때마다 실�
 
 ```js
 this.$input = document.getElementById('input');
-this.$input.addEventListener('input', event => delayListenEvent(event, handleInput.bind(this), 1000));
+this.$input.addEventListener('input', event =>
+  delayListenEvent(event, handleInput.bind(this), 1000),
+);
 
 function handleInput() {
   const { value } = this.$input;
