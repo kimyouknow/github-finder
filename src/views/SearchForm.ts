@@ -12,7 +12,7 @@ const SearchForm = () => html`
         autocomplete="off"
         class="search-form__input"
       />
-      <button class="search-form__button">제출</button>
+      <button class="search-form__button">검색</button>
     </form>
     ${SearchAutoComplete()} ${SearchHistory()}
   </div>
@@ -40,7 +40,7 @@ export const SearchAutoComplete = (keywords?: Keyword[]) => {
 
 export const EmptyKeyword = () => {
   return html`<ul>
-    <h4>일치하는 키워드가 없습니다.</h4>
+    <h4 class="keywords__header">일치하는 키워드가 없습니다.</h4>
   </ul>`;
 };
 
@@ -49,7 +49,7 @@ export const KeywordList = (keywords: Keyword[], type: 'autoComplete' | 'history
   return html`<ul id="keywordList" data-keyword-type=${type} class="keywords__ul">
     ${keywords.map(
       ({ id, text, isActive }, idx) =>
-        html`<li data-id=${id} data-rank=${idx} class=${`keywords__li ${isActiveClass(isActive)}`}>
+        html`<li data-id=${id} data-rank=${idx} class="keywords__li ${isActiveClass(isActive)}">
           ${text}
         </li>`,
     )}

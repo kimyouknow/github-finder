@@ -33,9 +33,9 @@
 }
 
 .keywords {
-  margin-top: 4px;
   border: 1px solid var(--color-gray-1000);
   border-radius: 0.5rem;
+  margin-top: 4px;
 
   &__header {
     padding: 0.4rem;
@@ -50,8 +50,8 @@
 
   &__footer {
     display: grid;
-    width: 100%;
     padding: 0.4rem;
+    width: 100%;
   }
 
   &__del-all {
