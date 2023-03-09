@@ -4,9 +4,10 @@ import { $ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
 
 import {
+  hideAutoCompleteList,
+  hideSearchHistory,
   showAutoCompleteList,
   showSearchHistory,
-  toggleSearchAutoCompleteList,
   toggleSearchHistory,
   updateInput,
   updateInputText,
@@ -33,7 +34,8 @@ const handleSubmit = async (event: Event) => {
   const userProfiles = userProfileStore.getUserProfiles();
   updateUserProfileList(userProfiles);
 
-  toggleSearchAutoCompleteList();
+  hideSearchHistory();
+  hideAutoCompleteList();
 };
 
 const handleAutoComplete = async (inputText: string) => {
@@ -51,11 +53,13 @@ const handleSearchInput = debounce(1000, async () => {
     const keywords = historyStore.getKeywords();
     updateSearchHistory(keywords);
     showSearchHistory();
+    hideAutoCompleteList();
     return;
   }
 
   await handleAutoComplete(inputText);
   showAutoCompleteList();
+  hideSearchHistory();
 });
 
 const handleKeyDownSearchInput = (event: KeyboardEvent) => {
@@ -95,12 +99,8 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
   }
 };
 
-const handleClickSearchInput = (event: Event) => {
+const handleClickSearchInput = () => {
   // 로컬스토리에서 검색 목록 가져오기
-  const textInput = (event.currentTarget as HTMLInputElement).value;
-  if (textInput !== '') {
-    return;
-  }
   const keywords = historyStore.getFormStorage();
 
   if (!keywords) {
@@ -114,6 +114,15 @@ const handleClickSearchInput = (event: Event) => {
   toggleSearchHistory();
 };
 
+const handleClickOutside = (event: Event) => {
+  const $searchForm = $<HTMLElement>('#searchFormContainer');
+  const isClickSearchForm = event.composedPath().includes($searchForm);
+  if (!isClickSearchForm) {
+    hideSearchHistory();
+    hideAutoCompleteList();
+  }
+};
+
 const handleSearchFormEvent = () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $form = $<HTMLFormElement>('#searchForm', $searchForm);
@@ -123,6 +132,7 @@ const handleSearchFormEvent = () => {
   $searchInput.addEventListener('input', handleSearchInput);
   $searchInput.addEventListener('keydown', handleKeyDownSearchInput);
   $searchInput.addEventListener('click', handleClickSearchInput);
+  window.addEventListener('click', handleClickOutside);
 };
 
 export default handleSearchFormEvent;
