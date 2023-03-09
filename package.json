@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "github finder - user, code",
   "main": "index.js",
+  "homepage": "https://github.com/kimyouknow/github-finder",
   "scripts": {
     "postinstall": "husky install",
     "test": "jest",
