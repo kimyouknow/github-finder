@@ -1,0 +1,47 @@
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0 auto;
+  padding: 1rem 0, 5rem;
+  width: 768px;
+}
+
+.user-element {
+  display: flex;
+  gap: 1rem;
+
+  &__avatar {
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+  }
+
+  &__info-list {
+    align-items: center;
+    display: flex;
+    gap: 0.4rem;
+    width: 100%;
+  }
+
+  &__info {
+    width: 40%;
+
+    &-key {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-right: 1rem;
+      text-align: center;
+    }
+
+    &-value {
+      text-align: center;
+
+      > a {
+        &:hover {
+          color: var(--color-primary);
+        }
+      }
+    }
+  }
+}
