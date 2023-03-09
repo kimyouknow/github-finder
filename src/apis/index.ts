@@ -24,7 +24,7 @@ const coreGithubSearchRequest = async <T>(type: SearchType, query: string) => {
   };
   const result = await fetchData<T>(
     `https://api.github.com/search/${type}?${query}`,
-    githubOpenApiHeader,
+    // githubOpenApiHeader,
   );
   return result;
 };
