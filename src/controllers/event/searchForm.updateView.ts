@@ -42,16 +42,22 @@ export const toggleSearchHistory = () => {
 };
 
 export const showSearchHistory = () => {
-  const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
   const $searchHistory = $<HTMLElement>('#searchHistory');
   $searchHistory.classList.remove('display-none');
-  $searchAutoComplete.classList.add('display-none');
 };
 
 export const showAutoCompleteList = () => {
   const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
-  const $searchHistory = $<HTMLElement>('#searchHistory');
   $searchAutoComplete.classList.remove('display-none');
+};
+
+export const hideSearchHistory = () => {
+  const $searchHistory = $<HTMLElement>('#searchHistory');
+  $searchHistory.classList.add('display-none');
+};
+
+export const hideAutoCompleteList = () => {
+  const $searchHistory = $<HTMLElement>('#searchAutoComplete');
   $searchHistory.classList.add('display-none');
 };
 
