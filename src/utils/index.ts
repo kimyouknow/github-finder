@@ -20,3 +20,8 @@ export type DateMMDD = `${MM}${DD}`;
 
 export const formatDateToMMDD = (date: Date): DateMMDD =>
   date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) as DateMMDD;
+
+type CallbackFn<T> = (arg: T) => T;
+
+export const go = <T>(item: T, ...args: CallbackFn<T>[]) =>
+  args.reduce((a: T, callback: CallbackFn<T>) => callback(a), item);
