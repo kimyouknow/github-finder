@@ -221,3 +221,20 @@ core-js/modules/es.array.*.js
 - https://babeljs.io/docs/babel-preset-env#usebuiltins
 - https://velog.io/@vnthf/corejs3로-대체하자-zok3p9aouy
 - https://tech.kakao.com/2020/12/01/frontend-growth-02/
+
+## 이벤트 등록 불편함
+
+display none 상태에서 등록한 이벤트가 등록되지 않아서, 돔이 렌더링 될때마다 이벤트를 달아줘야함
+
+해결
+
+delegation으로 해결
+
+```ts
+const bindEventToChildren = (event: Event) => {
+  const $deleteAllButton = $<HTMLButtonElement>('#searchHistoryDeleteAll');
+  if (event.target === $deleteAllButton) {
+    handleClickDeleteAllButton(event);
+  }
+};
+```

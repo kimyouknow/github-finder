@@ -79,6 +79,10 @@ const HistoryKeyWord = (initKeywords: Keyword[], storageKey: string) => {
       keywordManager.setKeywords(newKeywords);
       saveToStorage(newKeywords);
     },
+    removeAll() {
+      browserStorage.remove(storageKey);
+      keywordManager.setKeywords([]);
+    },
   };
 };
 

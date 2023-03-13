@@ -123,11 +123,24 @@ const handleClickOutside = (event: Event) => {
   }
 };
 
+const handleClickDeleteAllButton = (event: Event) => {
+  historyStore.removeAll();
+  updateKeywordList([], 'history');
+};
+
+const bindEventToChildren = (event: Event) => {
+  const $deleteAllButton = $<HTMLButtonElement>('#searchHistoryDeleteAll');
+  if (event.target === $deleteAllButton) {
+    handleClickDeleteAllButton(event);
+  }
+};
+
 const handleSearchFormEvent = () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $form = $<HTMLFormElement>('#searchForm', $searchForm);
   const $searchInput = $<HTMLInputElement>('#inputNickname', $searchForm);
 
+  $searchForm.addEventListener('click', bindEventToChildren);
   $form.addEventListener('submit', handleSubmit);
   $searchInput.addEventListener('input', handleSearchInput);
   $searchInput.addEventListener('keydown', handleKeyDownSearchInput);
