@@ -21,7 +21,7 @@ const SearchForm = () => html`
 export const SearchHistory = (keywords?: Keyword[]) => {
   return html`<div id="searchHistory" class="keywords display-none">
     <h4 class="keywords__header">최근 검색어</h4>
-    ${keywords ? KeywordList(keywords, 'history') : EmptyKeyword()}
+    ${KeywordList('history', keywords)}
     <div class="keywords__footer">
       <button id="searchHistoryDeleteAll" class="keywords__del-all">전체 삭제</button>
     </div>
@@ -31,7 +31,7 @@ export const SearchHistory = (keywords?: Keyword[]) => {
 export const SearchAutoComplete = (keywords?: Keyword[]) => {
   return html`<div id="searchAutoComplete" class="keywords display-none">
     <h4 class="keywords__header">검색어 자동 완성</h4>
-    ${keywords ? KeywordList(keywords, 'autoComplete') : EmptyKeyword()}
+    ${KeywordList('autoComplete', keywords)}
     <div class="keywords__footer">
       <button id="searchAutoCompleteDeleteAll" class="keywords__del-all">전체 삭제</button>
     </div>
@@ -44,7 +44,8 @@ export const EmptyKeyword = () => {
   </ul>`;
 };
 
-export const KeywordList = (keywords: Keyword[], type: 'autoComplete' | 'history') => {
+export const KeywordList = (type: 'autoComplete' | 'history', keywords?: Keyword[]) => {
+  if (!keywords || keywords.length === 0) return EmptyKeyword();
   const isActiveClass = (isActive: boolean) => (isActive ? 'keyword-active' : '');
   return html`<ul id="keywordList" data-keyword-type=${type} class="keywords__ul">
     ${keywords.map(

@@ -1,4 +1,4 @@
-import { cloneDeep, DateMMDD, formatDateToMMDD } from '@/utils';
+import { cloneDeep, DateMMDD, formatDateToMMDD, go, removeDuplicatesByKey } from '@/utils';
 import browserStorage from '@/utils/browser';
 
 import { UserProfile } from './userProfile';
@@ -35,6 +35,9 @@ const KeyWord = (initKeywords: Keyword[]) => {
     setKeywords(keywords: Keyword[]) {
       state.keywords = cloneDeep(keywords);
     },
+    resetActive() {
+      state.keywords = state.keywords.map(v => ({ ...v, isActive: false }));
+    },
     moveActive(dr: 'up' | 'down') {
       const activeIndex = state.keywords.findIndex(k => k.isActive);
       let nextIndex = dr === 'down' ? activeIndex + 1 : activeIndex - 1;
@@ -58,6 +61,7 @@ const KeyWord = (initKeywords: Keyword[]) => {
 
 const HistoryKeyWord = (initKeywords: Keyword[], storageKey: string) => {
   const keywordManager = KeyWord(initKeywords);
+
   const saveToStorage = (keywords: Keyword[]) => {
     browserStorage.set(storageKey, keywords);
   };
@@ -74,10 +78,18 @@ const HistoryKeyWord = (initKeywords: Keyword[], storageKey: string) => {
     addKeyword(text: string) {
       const keywords = keywordManager.getKeywords();
       const newKeyword = makeKeywordDto(text);
-      // TODO: 중복제거
-      const newKeywords = [...keywords, newKeyword];
+      const newKeywords = go(
+        [newKeyword, ...keywords],
+        keywords => removeDuplicatesByKey(keywords, 'id'),
+        keywords => removeDuplicatesByKey(keywords, 'text'),
+      );
       keywordManager.setKeywords(newKeywords);
+      keywordManager.resetActive();
       saveToStorage(newKeywords);
+    },
+    removeAll() {
+      browserStorage.remove(storageKey);
+      keywordManager.setKeywords([]);
     },
   };
 };
