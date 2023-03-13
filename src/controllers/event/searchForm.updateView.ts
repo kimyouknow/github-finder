@@ -28,7 +28,7 @@ export const toggleSearchAutoCompleteList = () => {
 
 export const updateKeywordList = (keywords: Keyword[], type: 'autoComplete' | 'history') => {
   const $keywordList = $<HTMLElement>('#keywordList');
-  render($keywordList, KeywordList, keywords, type);
+  render($keywordList, KeywordList, type, keywords);
 };
 
 export const updateSearchHistory = (keywords?: Keyword[]) => {
