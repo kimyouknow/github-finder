@@ -35,6 +35,9 @@ const KeyWord = (initKeywords: Keyword[]) => {
     setKeywords(keywords: Keyword[]) {
       state.keywords = cloneDeep(keywords);
     },
+    resetActive() {
+      state.keywords = state.keywords.map(v => ({ ...v, isActive: false }));
+    },
     moveActive(dr: 'up' | 'down') {
       const activeIndex = state.keywords.findIndex(k => k.isActive);
       let nextIndex = dr === 'down' ? activeIndex + 1 : activeIndex - 1;
@@ -81,6 +84,7 @@ const HistoryKeyWord = (initKeywords: Keyword[], storageKey: string) => {
         keywords => removeDuplicatesByKey(keywords, 'text'),
       );
       keywordManager.setKeywords(newKeywords);
+      keywordManager.resetActive();
       saveToStorage(newKeywords);
     },
     removeAll() {

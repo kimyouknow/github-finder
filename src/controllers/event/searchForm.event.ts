@@ -8,7 +8,6 @@ import {
   hideSearchHistory,
   showAutoCompleteList,
   showSearchHistory,
-  toggleSearchHistory,
   updateInput,
   updateInputText,
   updateKeywordList,
@@ -63,13 +62,15 @@ const handleSearchInput = debounce(1000, async () => {
 });
 
 const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
   const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
   const $searchHistory = $<HTMLElement>('#searchHistory');
+
   const $activeList = $searchAutoComplete.classList.contains('display-none')
     ? $searchHistory
     : $searchAutoComplete;
 
-  const $keywordList = $<HTMLElement>('#keywordList', $activeList);
+  const $keywordList = $<HTMLUListElement>('#keywordList', $activeList);
 
   const keywordListType = $keywordList.getAttribute('data-keyword-type') as
     | 'autoComplete'
@@ -77,7 +78,11 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
 
   const keywordStoreType = keywordListType === 'history' ? historyStore : autoCompleteListStore;
   const keywords = keywordStoreType.getKeywords();
-  if (keywords.length === 0) return;
+
+  if ($inputNickname.value === '') {
+    updateSearchHistory(keywords || []);
+    showSearchHistory();
+  }
 
   const { key } = event;
   if (key === 'ArrowDown') {
@@ -103,15 +108,10 @@ const handleClickSearchInput = () => {
   // 로컬스토리에서 검색 목록 가져오기
   const keywords = historyStore.getFormStorage();
 
-  if (!keywords) {
-    // 없으면 빈 화면 렌더링
-    updateSearchHistory();
-  } else {
-    // 있으면 업데이트 후 렌더링
-    updateSearchHistory(keywords);
-  }
+  updateSearchHistory(keywords || []);
 
-  toggleSearchHistory();
+  hideAutoCompleteList();
+  showSearchHistory();
 };
 
 const handleClickOutside = (event: Event) => {
