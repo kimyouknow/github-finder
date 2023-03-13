@@ -25,3 +25,15 @@ type CallbackFn<T> = (arg: T) => T;
 
 export const go = <T>(item: T, ...args: CallbackFn<T>[]) =>
   args.reduce((a: T, callback: CallbackFn<T>) => callback(a), item);
+
+export const removeDuplicatesByKey = <T, K extends keyof T>(items: T[], key: K) => {
+  const filteredItems: T[] = [];
+  const valueSet = new Set<T[K]>();
+  for (const item of items) {
+    if (!valueSet.has(item[key])) {
+      filteredItems.push(item);
+      valueSet.add(item[key]);
+    }
+  }
+  return filteredItems;
+};
