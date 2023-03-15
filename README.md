@@ -65,3 +65,9 @@ https://user-images.githubusercontent.com/71386219/225251645-c48324fa-b5f2-4229-
 #### 기타
 
 - [ ] : 검색 쿼리 url 상태로 반영
+
+## 로컬 실행방법
+
+```shell
+$ npm install && npm run dev
+```
