@@ -20,14 +20,9 @@ const { autoCompleteListStore, historyStore } = keywordStore;
 
 // Event Handler
 
-const handleSubmit = async (event: Event) => {
-  event.preventDefault();
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  const inputText = $inputNickname.value;
+const submitKeyword = async (inputText: string) => {
   await userProfileStore.requestUserProfile(inputText);
-
-  updateInput();
-
+  updateInput(inputText);
   historyStore.addKeyword(inputText);
 
   const userProfiles = userProfileStore.getUserProfiles();
@@ -35,6 +30,14 @@ const handleSubmit = async (event: Event) => {
 
   hideSearchHistory();
   hideAutoCompleteList();
+};
+
+const handleSubmit = (event: Event) => {
+  event.preventDefault();
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  const inputText = $inputNickname.value;
+
+  void submitKeyword(inputText);
 };
 
 const handleAutoComplete = async (inputText: string) => {
@@ -146,7 +149,7 @@ const handleClickDeleteTargetButton = (event: Event) => {
   updateKeywordList(newKeywords, 'history');
 };
 
-const bindEventToChildren = (event: Event) => {
+const handleClickButton = (event: Event) => {
   const $deleteAllButton = $<HTMLButtonElement>('#searchHistoryDeleteAll');
   const $deleteTargetButtons = $$<HTMLButtonElement>('#historyController > button');
 
@@ -161,12 +164,33 @@ const bindEventToChildren = (event: Event) => {
   }
 };
 
+const handleDoubleClickKeyword = async (event: Event) => {
+  const targetText = $<HTMLSpanElement>('span', event.target as HTMLLIElement);
+
+  if (targetText && targetText.textContent) {
+    await submitKeyword(targetText.textContent);
+  }
+};
+
+const bindClickEventToChildren = (event: Event) => {
+  handleClickButton(event);
+};
+
+const bindDoubleClickEventToChildren = (event: Event) => {
+  const $keywords = $$<HTMLLIElement>('#keywordList > li');
+  if ($keywords.includes(event.target as HTMLLIElement)) {
+    void handleDoubleClickKeyword(event);
+    return;
+  }
+};
+
 const handleSearchFormEvent = () => {
   const $searchForm = $<HTMLElement>('#searchFormContainer');
   const $form = $<HTMLFormElement>('#searchForm', $searchForm);
   const $searchInput = $<HTMLInputElement>('#inputNickname', $searchForm);
 
-  $searchForm.addEventListener('click', bindEventToChildren);
+  $searchForm.addEventListener('click', bindClickEventToChildren);
+  $searchForm.addEventListener('dblclick', bindDoubleClickEventToChildren);
   $form.addEventListener('submit', handleSubmit);
   $searchInput.addEventListener('input', handleSearchInput);
   $searchInput.addEventListener('keydown', handleKeyDownSearchInput);
