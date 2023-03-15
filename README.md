@@ -6,7 +6,7 @@
 
 ## 기술 구현 문서
 
-- [ ] : ⭐️ [vanilla front end architecture](docs/core.md)
+- [x] : ⭐️ [vanilla front end architecture](docs/core.md) - 현재 적용한 구성과 단점
 - [x] : ⭐️ [커스텀 html](docs/html.md)
 - [x] : [최적화(debounce, throttle)](docs/optimize.md)
 - [ ] : fetch util
