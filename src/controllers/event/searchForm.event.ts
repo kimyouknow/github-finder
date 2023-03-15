@@ -1,6 +1,6 @@
 import keywordStore, { makeKeywordDtoList } from '@/controllers/service/keywords';
 import userProfileStore from '@/controllers/service/userProfile';
-import { $ } from '@/utils/dom';
+import { $, $$ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
 
 import {
@@ -61,7 +61,7 @@ const handleSearchInput = debounce(1000, async () => {
   hideSearchHistory();
 });
 
-const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+const handleActiveTargetKeyword = (event: KeyboardEvent) => {
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
   const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
   const $searchHistory = $<HTMLElement>('#searchHistory');
@@ -74,7 +74,11 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
 
   const keywordListType = $keywordList.getAttribute('data-keyword-type') as
     | 'autoComplete'
-    | 'history';
+    | 'history'
+    | null;
+
+  // EmptyKeyword
+  if (!keywordListType) return;
 
   const keywordStoreType = keywordListType === 'history' ? historyStore : autoCompleteListStore;
   const keywords = keywordStoreType.getKeywords();
@@ -104,6 +108,12 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
   }
 };
 
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  const { key } = event;
+
+  if (key === 'ArrowDown' || key === 'ArrowUp') handleActiveTargetKeyword(event);
+};
+
 const handleClickSearchInput = () => {
   // 로컬스토리에서 검색 목록 가져오기
   const keywords = historyStore.getFormStorage();
@@ -123,15 +133,31 @@ const handleClickOutside = (event: Event) => {
   }
 };
 
-const handleClickDeleteAllButton = (event: Event) => {
+const handleClickDeleteAllButton = () => {
   historyStore.removeAll();
   updateKeywordList([], 'history');
 };
 
+const handleClickDeleteTargetButton = (event: Event) => {
+  const id = Number((event.target as HTMLButtonElement).getAttribute('data-id'));
+  historyStore.removeKeyword(id);
+  const newKeywords = historyStore.getFormStorage() || [];
+
+  updateKeywordList(newKeywords, 'history');
+};
+
 const bindEventToChildren = (event: Event) => {
   const $deleteAllButton = $<HTMLButtonElement>('#searchHistoryDeleteAll');
+  const $deleteTargetButtons = $$<HTMLButtonElement>('#historyController > button');
+
   if (event.target === $deleteAllButton) {
-    handleClickDeleteAllButton(event);
+    handleClickDeleteAllButton();
+    return;
+  }
+
+  if ($deleteTargetButtons.includes(event.target as HTMLButtonElement)) {
+    handleClickDeleteTargetButton(event);
+    return;
   }
 };
 

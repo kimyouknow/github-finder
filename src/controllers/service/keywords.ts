@@ -1,4 +1,4 @@
-import { cloneDeep, DateMMDD, formatDateToMMDD, go, removeDuplicatesByKey } from '@/utils';
+import { cloneDeep, go, removeDuplicatesByKey } from '@/utils';
 import browserStorage from '@/utils/browser';
 
 import { UserProfile } from './userProfile';
@@ -7,14 +7,14 @@ export type Keyword = {
   id: number;
   text: string;
   isActive: boolean;
-  searchAt: DateMMDD;
+  searchAt: Date;
 };
 
 export const makeKeywordDto = (text: string, id: number = new Date().valueOf()): Keyword => ({
   id,
   text,
   isActive: false,
-  searchAt: formatDateToMMDD(new Date()),
+  searchAt: new Date(),
 });
 
 export const makeKeywordDtoList = (userProfiles: UserProfile[]): Keyword[] =>
@@ -83,6 +83,13 @@ const HistoryKeyWord = (initKeywords: Keyword[], storageKey: string) => {
         keywords => removeDuplicatesByKey(keywords, 'id'),
         keywords => removeDuplicatesByKey(keywords, 'text'),
       );
+      keywordManager.setKeywords(newKeywords);
+      keywordManager.resetActive();
+      saveToStorage(newKeywords);
+    },
+    removeKeyword(id: number) {
+      const keywords = keywordManager.getKeywords();
+      const newKeywords = keywords.filter(keyword => keyword.id !== id);
       keywordManager.setKeywords(newKeywords);
       keywordManager.resetActive();
       saveToStorage(newKeywords);

@@ -46,7 +46,19 @@
   }
 
   &__li {
-    padding: 0.2rem 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2rem 0.6rem;
+  }
+
+  &__li__history-controller {
+    > button {
+      margin-left: 0.5rem;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
   }
 
   &__footer {
