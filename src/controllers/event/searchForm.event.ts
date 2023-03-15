@@ -1,6 +1,6 @@
 import keywordStore, { makeKeywordDtoList } from '@/controllers/service/keywords';
 import userProfileStore from '@/controllers/service/userProfile';
-import { $ } from '@/utils/dom';
+import { $, $$ } from '@/utils/dom';
 import { debounce } from '@/utils/optimize';
 
 import {
@@ -20,14 +20,9 @@ const { autoCompleteListStore, historyStore } = keywordStore;
 
 // Event Handler
 
-const handleSubmit = async (event: Event) => {
-  event.preventDefault();
-  const $inputNickname = $<HTMLInputElement>('#inputNickname');
-  const inputText = $inputNickname.value;
+const submitKeyword = async (inputText: string) => {
   await userProfileStore.requestUserProfile(inputText);
-
-  updateInput();
-
+  updateInput(inputText);
   historyStore.addKeyword(inputText);
 
   const userProfiles = userProfileStore.getUserProfiles();
@@ -35,6 +30,14 @@ const handleSubmit = async (event: Event) => {
 
   hideSearchHistory();
   hideAutoCompleteList();
+};
+
+const handleSubmit = (event: Event) => {
+  event.preventDefault();
+  const $inputNickname = $<HTMLInputElement>('#inputNickname');
+  const inputText = $inputNickname.value;
+
+  void submitKeyword(inputText);
 };
 
 const handleAutoComplete = async (inputText: string) => {
@@ -61,7 +64,7 @@ const handleSearchInput = debounce(1000, async () => {
   hideSearchHistory();
 });
 
-const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+const handleActiveTargetKeyword = (event: KeyboardEvent) => {
   const $inputNickname = $<HTMLInputElement>('#inputNickname');
   const $searchAutoComplete = $<HTMLElement>('#searchAutoComplete');
   const $searchHistory = $<HTMLElement>('#searchHistory');
@@ -74,7 +77,11 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
 
   const keywordListType = $keywordList.getAttribute('data-keyword-type') as
     | 'autoComplete'
-    | 'history';
+    | 'history'
+    | null;
+
+  // EmptyKeyword
+  if (!keywordListType) return;
 
   const keywordStoreType = keywordListType === 'history' ? historyStore : autoCompleteListStore;
   const keywords = keywordStoreType.getKeywords();
@@ -104,6 +111,12 @@ const handleKeyDownSearchInput = (event: KeyboardEvent) => {
   }
 };
 
+const handleKeyDownSearchInput = (event: KeyboardEvent) => {
+  const { key } = event;
+
+  if (key === 'ArrowDown' || key === 'ArrowUp') handleActiveTargetKeyword(event);
+};
+
 const handleClickSearchInput = () => {
   // 로컬스토리에서 검색 목록 가져오기
   const keywords = historyStore.getFormStorage();
@@ -123,15 +136,51 @@ const handleClickOutside = (event: Event) => {
   }
 };
 
-const handleClickDeleteAllButton = (event: Event) => {
+const handleClickDeleteAllButton = () => {
   historyStore.removeAll();
   updateKeywordList([], 'history');
 };
 
-const bindEventToChildren = (event: Event) => {
+const handleClickDeleteTargetButton = (event: Event) => {
+  const id = Number((event.target as HTMLButtonElement).getAttribute('data-id'));
+  historyStore.removeKeyword(id);
+  const newKeywords = historyStore.getFormStorage() || [];
+
+  updateKeywordList(newKeywords, 'history');
+};
+
+const handleClickButton = (event: Event) => {
   const $deleteAllButton = $<HTMLButtonElement>('#searchHistoryDeleteAll');
+  const $deleteTargetButtons = $$<HTMLButtonElement>('#historyController > button');
+
   if (event.target === $deleteAllButton) {
-    handleClickDeleteAllButton(event);
+    handleClickDeleteAllButton();
+    return;
+  }
+
+  if ($deleteTargetButtons.includes(event.target as HTMLButtonElement)) {
+    handleClickDeleteTargetButton(event);
+    return;
+  }
+};
+
+const handleDoubleClickKeyword = async (event: Event) => {
+  const targetText = $<HTMLSpanElement>('span', event.target as HTMLLIElement);
+
+  if (targetText && targetText.textContent) {
+    await submitKeyword(targetText.textContent);
+  }
+};
+
+const bindClickEventToChildren = (event: Event) => {
+  handleClickButton(event);
+};
+
+const bindDoubleClickEventToChildren = (event: Event) => {
+  const $keywords = $$<HTMLLIElement>('#keywordList > li');
+  if ($keywords.includes(event.target as HTMLLIElement)) {
+    void handleDoubleClickKeyword(event);
+    return;
   }
 };
 
@@ -140,7 +189,8 @@ const handleSearchFormEvent = () => {
   const $form = $<HTMLFormElement>('#searchForm', $searchForm);
   const $searchInput = $<HTMLInputElement>('#inputNickname', $searchForm);
 
-  $searchForm.addEventListener('click', bindEventToChildren);
+  $searchForm.addEventListener('click', bindClickEventToChildren);
+  $searchForm.addEventListener('dblclick', bindDoubleClickEventToChildren);
   $form.addEventListener('submit', handleSubmit);
   $searchInput.addEventListener('input', handleSearchInput);
   $searchInput.addEventListener('keydown', handleKeyDownSearchInput);

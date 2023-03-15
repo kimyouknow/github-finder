@@ -16,10 +16,12 @@ type DD = `${0}${oneToNine}` | `${1 | 2}${zeroToNine}` | `3${0 | 1}`;
 /**
  * MMDD
  */
-export type DateMMDD = `${MM}${DD}`;
+export type DateMMDD = `${MM}.${DD}.`;
 
-export const formatDateToMMDD = (date: Date): DateMMDD =>
-  date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) as DateMMDD;
+export const formatDateToMMDD = (d: Date | string): DateMMDD => {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  return date.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }) as DateMMDD;
+};
 
 type CallbackFn<T> = (arg: T) => T;
 

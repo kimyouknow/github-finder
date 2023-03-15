@@ -1,4 +1,5 @@
 import { Keyword } from '@/controllers/service/keywords';
+import { formatDateToMMDD } from '@/utils';
 import { html } from '@/utils/dom';
 
 const SearchForm = () => html`
@@ -39,19 +40,31 @@ export const SearchAutoComplete = (keywords?: Keyword[]) => {
 };
 
 export const EmptyKeyword = () => {
-  return html`<ul>
+  return html`<ul id="keywordList">
     <h4 class="keywords__header">일치하는 키워드가 없습니다.</h4>
   </ul>`;
 };
 
 export const KeywordList = (type: 'autoComplete' | 'history', keywords?: Keyword[]) => {
   if (!keywords || keywords.length === 0) return EmptyKeyword();
+
   const isActiveClass = (isActive: boolean) => (isActive ? 'keyword-active' : '');
+  const isHistory = type === 'history';
+  const isDisplayHistoryController = isHistory ? '' : 'display-none';
+  // TODO: const isHighlightSameWord = isHistory ? :
+
   return html`<ul id="keywordList" data-keyword-type=${type} class="keywords__ul">
     ${keywords.map(
-      ({ id, text, isActive }, idx) =>
+      ({ id, text, isActive, searchAt }, idx) =>
         html`<li data-id=${id} data-rank=${idx} class="keywords__li ${isActiveClass(isActive)}">
-          ${text}
+          <span>${text}</span>
+          <div
+            id="historyController"
+            class="keywords__li__history-controller ${isDisplayHistoryController}"
+          >
+            <span>${formatDateToMMDD(searchAt)}</span>
+            <button data-id=${id}>X</button>
+          </div>
         </li>`,
     )}
   </ul>`;
